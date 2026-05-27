@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLnode
+from htmlnode import HTMLnode, LeafNode
 
 class TestHTMLnode(unittest.TestCase):
     def test_init(self):
@@ -24,6 +24,23 @@ class TestHTMLnode(unittest.TestCase):
         expected_repr = "HTMLnode(tag='div', value='Hello', children=[], props={'class': 'my-class'})"
         self.assertEqual(repr(node), expected_repr) 
 
+class TestLeafNode(unittest.TestCase):
+    def test_init(self):
+        node = LeafNode(tag='p', value="Hello, World!")
+        self.assertEqual(node.to_html(), "<p>Hello, World!</p>")
+
+    def test_to_html(self):
+        node = LeafNode(tag='a', value="Click me!", props={"href": "https://www.google.com"})
+        self.assertEqual(node.to_html(), '<a href="https://www.google.com">Click me!</a>') 
+
+    def test_leaf_no_value(self):
+        with self.assertRaises(ValueError):
+            LeafNode("p", None).to_html()
+
+    def test_repr(self):
+        node = LeafNode(tag='p', value='Hello, World!')
+        expected_repr = "LeafNode(tag='p', value='Hello, World!', props=None)"
+        self.assertEqual(repr(node), expected_repr)        
     
 if __name__ == '__main__':
     unittest.main()
