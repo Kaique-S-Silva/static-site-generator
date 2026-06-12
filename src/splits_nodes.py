@@ -1,4 +1,5 @@
 from textnode import *
+from extract_markdown import *
 
 def split_nodes_delimeter(old_nodes: list[TextNode], delimeter: str, text_type: TextType) ->  list[TextNode]:
     return_list = []
@@ -17,4 +18,66 @@ def split_nodes_delimeter(old_nodes: list[TextNode], delimeter: str, text_type: 
                     return_list.append(TextNode(text=i_text[j], text_type=TextType.TEXT))
                 else:
                     return_list.append(TextNode(i_text[j], text_type))
+    return return_list
+
+def split_nodes_image(old_nodes: list[TextNode]) -> list[TextNode]:
+    return_list = []
+
+    for i in old_nodes:
+        if i.text_type != TextType.TEXT:
+            return_list.append(i)
+        else:
+            images = extract_markdown_images(i.text)
+            if len(images) == 0:
+                return_list.append(i)
+            else:
+                original_text = i.text
+
+                for image in images:
+                    alt = image[0]
+                    url = image[1]
+                    target_markdown = f"![{alt}]({url})"
+
+                    sections = original_text.split(target_markdown, 1)
+
+                    if sections[0] != "":
+                        return_list.append(TextNode(sections[0], TextType.TEXT))
+                    return_list.append(TextNode(alt, TextType.IMAGE, url))
+
+                    original_text = sections[1]
+
+                if original_text != "":
+                    return_list.append(TextNode(original_text, TextType.TEXT))
+
+    return return_list
+
+def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
+    return_list = []
+
+    for i in old_nodes:
+        if i.text_type != TextType.TEXT:
+            return_list.append(i)
+        else:
+            links = extract_markdown_links(i.text)
+            if len(links) == 0:
+                return_list.append(i)
+            else:
+                original_text = i.text
+
+                for link in links:
+                    alt = link[0]
+                    url = link[1]
+                    target_markdown = f"[{alt}]({url})"
+
+                    sections = original_text.split(target_markdown, 1)
+
+                    if sections[0] != "":
+                        return_list.append(TextNode(sections[0], TextType.TEXT))
+                    return_list.append(TextNode(alt, TextType.LINK, url))
+
+                    original_text = sections[1]
+
+                if original_text != "":
+                    return_list.append(TextNode(original_text, TextType.TEXT))
+
     return return_list
